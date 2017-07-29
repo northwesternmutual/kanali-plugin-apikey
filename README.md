@@ -13,5 +13,6 @@ $ mkdir -p $GOPATH/src/github.com/northwesternmutual
 $ cd $GOPATH/src/github.com/northwesternmutual
 $ git clone https://github.com/northwesternmutual/kanali-plugin-apikey
 $ cd kanali-plugin-apikey
+$ make install_ci
 $ make kanali-plugin-apikey
 ```
