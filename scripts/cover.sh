@@ -57,4 +57,4 @@ for pkg in "$@"; do
 	go test $args -v -race "$pkg"
 done
 
-gocovmerge "$COVER"/*.out > cover.out
+# gocovmerge "$COVER"/*.out > cover.out

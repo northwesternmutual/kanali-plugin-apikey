@@ -6,3 +6,4 @@ kanali-plugin-apikey
 *.log
 .cover/
 .vscode/
+*.html
