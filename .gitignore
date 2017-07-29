@@ -1,0 +1,8 @@
+tmp/
+vendor/
+*.so
+kanali-plugin-apikey
+*.out
+*.log
+.cover/
+.vscode/
