@@ -3,7 +3,7 @@
 set -e
 
 COVER=.cover
-ROOT_PKG=github.com/northwesternmutual/kanali/
+ROOT_PKG=github.com/northwesternmutual/kanali-plugin-apikey/
 
 if [[ -d "$COVER" ]]; then
 	rm -rf "$COVER"
