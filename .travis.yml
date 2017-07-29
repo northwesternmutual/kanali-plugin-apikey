@@ -9,9 +9,5 @@ install:
 - make install_ci
 
 script:
-- make test_ci
-- ls
-- ls .cover
-- ls /home/travis/gopath/src/github.com/northwesternmutual/kanali-plugin-apikey
-- ls /home/travis/gopath/src/github.com/northwesternmutual/kanali-plugin-apikey/.cover
+- go test -coverprofile=cover.out
 - goveralls -coverprofile=cover.out -service=travis-ci
