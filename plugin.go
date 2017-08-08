@@ -127,6 +127,9 @@ func validateAPIKey(rule spec.Rule, method string) bool {
 // check to see wheather a given HTTP method can be found
 // in the list of HTTP methods belonging to a spec.GranularProxy
 func validateGranularRules(method string, rule *spec.GranularProxy) bool {
+	if rule == nil {
+		return false
+	}
 	for _, verb := range rule.Verbs {
 		if strings.ToUpper(verb) == strings.ToUpper(method) {
 			return true
