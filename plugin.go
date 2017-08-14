@@ -30,7 +30,7 @@ import (
 
 	"github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/controller"
-	"github.com/northwesternmutual/kanali/monitor"
+	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/server"
 	"github.com/northwesternmutual/kanali/spec"
 	"github.com/northwesternmutual/kanali/utils"
@@ -42,7 +42,7 @@ import (
 type APIKeyFactory struct{}
 
 // OnRequest intercepts a request before it get proxied to an upstream service
-func (k APIKeyFactory) OnRequest(ctx context.Context, p spec.APIProxy, c controller.Controller, r *http.Request, span opentracing.Span) error {
+func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, c controller.Controller, r *http.Request, span opentracing.Span) error {
 
 	// extract the api key header
 	apiKey := r.Header.Get(viper.GetString(config.FlagApikeyHeaderKey.GetLong()))
@@ -65,8 +65,8 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, p spec.APIProxy, c control
 	span.SetTag("kanali.api_key_name", key.ObjectMeta.Name)
 	span.SetTag("kanali.api_key_namespace", key.ObjectMeta.Namespace)
 
-	ctx = monitor.AddCtxMetric(ctx, "api_key_name", key.ObjectMeta.Name)
-	ctx = monitor.AddCtxMetric(ctx, "api_key_namespace", key.ObjectMeta.Namespace)
+	m.Add(metrics.Metric{"api_key_name", key.ObjectMeta.Name, true})
+	m.Add(metrics.Metric{"api_key_namespace", key.ObjectMeta.Namespace, true})
 
 	bindingsStore := spec.BindingStore
 	untypedBinding, err := bindingsStore.Get(p.ObjectMeta.Name, p.ObjectMeta.Namespace)
@@ -108,7 +108,7 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, p spec.APIProxy, c control
 
 // OnResponse intercepts a request after it has been proxied to an upstream service
 // but before the response gets returned to the client
-func (k APIKeyFactory) OnResponse(ctx context.Context, p spec.APIProxy, c controller.Controller, r *http.Request, resp *http.Response, span opentracing.Span) error {
+func (k APIKeyFactory) OnResponse(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, c controller.Controller, r *http.Request, resp *http.Response, span opentracing.Span) error {
 
 	return nil
 

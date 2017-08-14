@@ -1,5 +1,5 @@
-hash: e1103027820b7a0fc3558fd31f6d101ab523697725fedb2e5264a67dce924d5b
-updated: 2017-07-29T14:07:26.579125839-05:00
+hash: 9f00bfe5a77b694511588f55c7e37ec3f5b1a2db254c721269e2abcf5fced366
+updated: 2017-08-14T15:18:30.350176996-05:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -132,6 +132,7 @@ imports:
 - name: github.com/influxdata/influxdb
   version: 383332daed5595926c235f250b11433f67229c35
   subpackages:
+  - client
   - client/v2
   - models
   - pkg/escape
@@ -144,7 +145,7 @@ imports:
 - name: github.com/kr/text
   version: 7cafcd837844e784b526369c9bce262804aebc60
 - name: github.com/magiconair/properties
-  version: 61b492c03cf472e0c6419be5899b8e0dc28b1b88
+  version: 51463bfca2576e06c62a8504b5c0f06d61312647
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -152,14 +153,15 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/mitchellh/mapstructure
-  version: 740c764bc6149d3f1806231418adb9f52c11bcbf
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/northwesternmutual/kanali
-  version: b31850a44fbe051b58d68b1cd2ddd6938251417d
+  version: ec8c3d55b182f3173d33228c4ad259b7ca977c78
   subpackages:
   - config
   - controller
   - flow
   - handlers
+  - metrics
   - monitor
   - plugins
   - server
@@ -179,13 +181,13 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/spf13/cast
-  version: e31f36ffc91a2ba9ddb72a4b6a607ff9b3d3cb63
+  version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: f62e98d28ab7ad31d707ba837a966378465c7b57
+  version: 8c6fa02d2225de0f9bdcb7ca912556f68d172d8c
 - name: github.com/spf13/jwalterweatherman
-  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+  version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
-  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
   version: be5ff3e4840cf692388bde7a057595a474ef379e
 - name: github.com/stretchr/testify
@@ -224,7 +226,7 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/sys
-  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  version: 90796e5a05ce440b41c768bd9af257005e470461
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -255,7 +257,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 - name: k8s.io/kubernetes
   version: 8eb75a5810cba92ccad845ca360cf924f2385881
   subpackages:

@@ -5,6 +5,7 @@ import:
   subpackages:
   - assert
 - package: github.com/northwesternmutual/kanali
+  version: ec8c3d55b182f3173d33228c4ad259b7ca977c78
 - package: github.com/spf13/viper
   version: be5ff3e4840cf692388bde7a057595a474ef379e
 - package: github.com/opentracing/opentracing-go
