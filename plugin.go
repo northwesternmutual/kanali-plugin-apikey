@@ -47,6 +47,8 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec
 	// extract the api key header
 	apiKey := r.Header.Get(viper.GetString(config.FlagApikeyHeaderKey.GetLong()))
 	if apiKey == "" {
+    m.Add(metrics.Metric{"api_key_name", "unknown", true})
+  	m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
 		return &utils.StatusError{http.StatusUnauthorized, errors.New("apikey not found in request")}
 	}
 
@@ -54,11 +56,15 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec
 	keyStore := spec.KeyStore
 	untypedKey, err := keyStore.Get(apiKey)
 	if err != nil || untypedKey == nil {
+    m.Add(metrics.Metric{"api_key_name", "unknown", true})
+  	m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
 		return &utils.StatusError{http.StatusUnauthorized, errors.New("apikey not found in k8s cluster")}
 	}
 
 	key, ok := untypedKey.(spec.APIKey)
 	if !ok {
+    m.Add(metrics.Metric{"api_key_name", "unknown", true})
+  	m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
 		return &utils.StatusError{http.StatusUnauthorized, errors.New("apikey not found in k8s cluster")}
 	}
 
