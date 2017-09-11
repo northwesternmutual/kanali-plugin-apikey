@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Implementing new Plugins interface in Kanali v1.1.0
 - [LICENSE](./LICENSE) file.
+- Configuration items that take advantage of the decentralized Kanali configuration in `v1.1.5`
 ### Changed
 - API key validation will not be preformed on OPTIONS requests
 

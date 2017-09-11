@@ -40,10 +40,10 @@ import (
 func TestOnRequest(t *testing.T) {
 	assert := assert.New(t)
 
-  assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
 		Method: "OPTIONS",
 	}, opentracing.StartSpan("test span")))
-  assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
 		Method: "options",
 	}, opentracing.StartSpan("test span")))
 

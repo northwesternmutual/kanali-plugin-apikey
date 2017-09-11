@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/controller"
 	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/server"
@@ -37,6 +36,21 @@ import (
 	"github.com/northwesternmutual/kanali/utils"
 	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
+)
+
+func init() {
+	Flags.Add(
+		flagPluginsAPIKeyHeaderKey,
+	)
+}
+
+var (
+	flagPluginsAPIKeyHeaderKey = Flag{
+		long:  "plugin.apiKey.header_key",
+		short: "",
+		value: "apikey",
+		usage: "Name of the HTTP header holding the apikey.",
+	}
 )
 
 // APIKeyFactory is factory that implements the Plugin interface
@@ -52,7 +66,7 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec
 	}
 
 	// extract the api key header
-	apiKey := r.Header.Get(viper.GetString(config.FlagApikeyHeaderKey.GetLong()))
+	apiKey := r.Header.Get(viper.GetString(flagPluginsAPIKeyHeaderKey.GetLong()))
 	if apiKey == "" {
 		m.Add(metrics.Metric{"api_key_name", "unknown", true})
 		m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
