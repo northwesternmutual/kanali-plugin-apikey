@@ -47,7 +47,7 @@ func init() {
 
 var (
 	flagPluginsAPIKeyHeaderKey = config.Flag{
-		Long:  "plugin.apiKey.header_key",
+		Long:  "plugins.apiKey.header_key",
 		Short: "",
 		Value: "apikey",
 		Usage: "Name of the HTTP header holding the apikey.",
