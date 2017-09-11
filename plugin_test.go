@@ -40,6 +40,13 @@ import (
 func TestOnRequest(t *testing.T) {
 	assert := assert.New(t)
 
+  assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+		Method: "OPTIONS",
+	}, opentracing.StartSpan("test span")))
+  assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+		Method: "options",
+	}, opentracing.StartSpan("test span")))
+
 	assert.Equal("apikey not found in request", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, spec.APIProxy{}, controller.Controller{}, &http.Request{}, opentracing.StartSpan("test span")).Error(), "should have thrown error")
 
 	viper.SetDefault(config.FlagApikeyHeaderKey.GetLong(), "apikey")
