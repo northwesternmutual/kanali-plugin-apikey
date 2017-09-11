@@ -30,6 +30,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/northwesternmutual/kanali/controller"
+  "github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/server"
 	"github.com/northwesternmutual/kanali/spec"
@@ -39,13 +40,13 @@ import (
 )
 
 func init() {
-	Flags.Add(
+	config.Flags.Add(
 		flagPluginsAPIKeyHeaderKey,
 	)
 }
 
 var (
-	flagPluginsAPIKeyHeaderKey = Flag{
+	flagPluginsAPIKeyHeaderKey = config.Flag{
 		long:  "plugin.apiKey.header_key",
 		short: "",
 		value: "apikey",
