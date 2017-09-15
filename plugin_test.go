@@ -26,7 +26,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/controller"
 	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/spec"
@@ -49,7 +48,7 @@ func TestOnRequest(t *testing.T) {
 
 	assert.Equal("apikey not found in request", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, spec.APIProxy{}, controller.Controller{}, &http.Request{}, opentracing.StartSpan("test span")).Error(), "should have thrown error")
 
-	viper.SetDefault(config.FlagApikeyHeaderKey.GetLong(), "apikey")
+	viper.SetDefault(flagPluginsAPIKeyHeaderKey.GetLong(), "apikey")
 
 	u, _ := url.Parse("http://host.com/api/v1/accounts")
 

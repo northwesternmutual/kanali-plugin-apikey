@@ -29,8 +29,8 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/controller"
-  "github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/server"
 	"github.com/northwesternmutual/kanali/spec"
