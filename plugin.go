@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/controller"
 	"github.com/northwesternmutual/kanali/metrics"
@@ -38,17 +39,38 @@ import (
 	"github.com/spf13/viper"
 )
 
+func init() {
+	config.Flags.Add(
+		flagPluginsAPIKeyHeaderKey,
+	)
+}
+
+var (
+	flagPluginsAPIKeyHeaderKey = config.Flag{
+		Long:  "plugins.apiKey.header_key",
+		Short: "",
+		Value: "apikey",
+		Usage: "Name of the HTTP header holding the apikey.",
+	}
+)
+
 // APIKeyFactory is factory that implements the Plugin interface
 type APIKeyFactory struct{}
 
 // OnRequest intercepts a request before it get proxied to an upstream service
 func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, c controller.Controller, r *http.Request, span opentracing.Span) error {
 
+	// do not preform API key validation if a request is made using the OPTIONS http method
+	if strings.ToUpper(r.Method) == "OPTIONS" {
+		logrus.Debug("API key validation will not be preformed on HTTP OPTIONS requests")
+		return nil
+	}
+
 	// extract the api key header
-	apiKey := r.Header.Get(viper.GetString(config.FlagApikeyHeaderKey.GetLong()))
+	apiKey := r.Header.Get(viper.GetString(flagPluginsAPIKeyHeaderKey.GetLong()))
 	if apiKey == "" {
-    m.Add(metrics.Metric{"api_key_name", "unknown", true})
-  	m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
+		m.Add(metrics.Metric{"api_key_name", "unknown", true})
+		m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
 		return &utils.StatusError{http.StatusUnauthorized, errors.New("apikey not found in request")}
 	}
 
@@ -56,15 +78,15 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec
 	keyStore := spec.KeyStore
 	untypedKey, err := keyStore.Get(apiKey)
 	if err != nil || untypedKey == nil {
-    m.Add(metrics.Metric{"api_key_name", "unknown", true})
-  	m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
+		m.Add(metrics.Metric{"api_key_name", "unknown", true})
+		m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
 		return &utils.StatusError{http.StatusUnauthorized, errors.New("apikey not found in k8s cluster")}
 	}
 
 	key, ok := untypedKey.(spec.APIKey)
 	if !ok {
-    m.Add(metrics.Metric{"api_key_name", "unknown", true})
-  	m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
+		m.Add(metrics.Metric{"api_key_name", "unknown", true})
+		m.Add(metrics.Metric{"api_key_namespace", "unknown", true})
 		return &utils.StatusError{http.StatusUnauthorized, errors.New("apikey not found in k8s cluster")}
 	}
 
