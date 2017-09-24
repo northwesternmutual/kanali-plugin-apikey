@@ -30,7 +30,6 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/northwesternmutual/kanali/config"
-	"github.com/northwesternmutual/kanali/controller"
 	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/server"
 	"github.com/northwesternmutual/kanali/spec"
@@ -58,7 +57,7 @@ var (
 type APIKeyFactory struct{}
 
 // OnRequest intercepts a request before it get proxied to an upstream service
-func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, c controller.Controller, r *http.Request, span opentracing.Span) error {
+func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, r *http.Request, span opentracing.Span) error {
 
 	// do not preform API key validation if a request is made using the OPTIONS http method
 	if strings.ToUpper(r.Method) == "OPTIONS" {
@@ -136,7 +135,7 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec
 
 // OnResponse intercepts a request after it has been proxied to an upstream service
 // but before the response gets returned to the client
-func (k APIKeyFactory) OnResponse(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, c controller.Controller, r *http.Request, resp *http.Response, span opentracing.Span) error {
+func (k APIKeyFactory) OnResponse(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, r *http.Request, resp *http.Response, span opentracing.Span) error {
 
 	return nil
 
