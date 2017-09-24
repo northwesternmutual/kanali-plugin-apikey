@@ -26,7 +26,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/northwesternmutual/kanali/controller"
 	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/spec"
 	"github.com/opentracing/opentracing-go"
@@ -39,20 +38,20 @@ import (
 func TestOnRequest(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), &http.Request{
 		Method: "OPTIONS",
 	}, opentracing.StartSpan("test span")))
-	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), &http.Request{
 		Method: "options",
 	}, opentracing.StartSpan("test span")))
 
-	assert.Equal("apikey not found in request", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, spec.APIProxy{}, controller.Controller{}, &http.Request{}, opentracing.StartSpan("test span")).Error(), "should have thrown error")
+	assert.Equal("apikey not found in request", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, spec.APIProxy{}, &http.Request{}, opentracing.StartSpan("test span")).Error(), "should have thrown error")
 
 	viper.SetDefault(flagPluginsAPIKeyHeaderKey.GetLong(), "apikey")
 
 	u, _ := url.Parse("http://host.com/api/v1/accounts")
 
-	assert.Equal("apikey not found in k8s cluster", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Equal("apikey not found in k8s cluster", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), &http.Request{
 		Header: http.Header{
 			"Apikey": []string{"myapikey"},
 		},
@@ -62,7 +61,7 @@ func TestOnRequest(t *testing.T) {
 	apikeyStore := spec.KeyStore
 	apikeyStore.Set(getTestAPIKey())
 
-	assert.Equal("no binding found for associated APIProxy", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Equal("no binding found for associated APIProxy", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), &http.Request{
 		Header: http.Header{
 			"Apikey": []string{"myapikey"},
 		},
@@ -74,7 +73,7 @@ func TestOnRequest(t *testing.T) {
 	apikeybindingStore := spec.BindingStore
 	apikeybindingStore.Set(binding)
 
-	assert.Equal("api key not authorized for this proxy", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Equal("api key not authorized for this proxy", Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), &http.Request{
 		Header: http.Header{
 			"Apikey": []string{"myapikey"},
 		},
@@ -96,7 +95,7 @@ func TestOnRequest(t *testing.T) {
 	}
 
 	apikeybindingStore.Set(getTestAPIKeyBinding())
-	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), controller.Controller{}, &http.Request{
+	assert.Nil(Plugin.OnRequest(context.Background(), &metrics.Metrics{}, getTestAPIProxy(), &http.Request{
 		Header: http.Header{
 			"Apikey": []string{"myapikey"},
 		},
@@ -106,7 +105,7 @@ func TestOnRequest(t *testing.T) {
 
 func TestOnResponse(t *testing.T) {
 	assert := assert.New(t)
-	assert.Nil(Plugin.OnResponse(context.Background(), &metrics.Metrics{}, spec.APIProxy{}, controller.Controller{}, &http.Request{}, nil, opentracing.StartSpan("test span")))
+	assert.Nil(Plugin.OnResponse(context.Background(), &metrics.Metrics{}, spec.APIProxy{}, &http.Request{}, nil, opentracing.StartSpan("test span")))
 }
 
 func TestValidateAPIKey(t *testing.T) {
