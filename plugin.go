@@ -31,9 +31,9 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/metrics"
-	"github.com/northwesternmutual/kanali/server"
 	"github.com/northwesternmutual/kanali/spec"
 	"github.com/northwesternmutual/kanali/utils"
+  "github.com/northwesternmutual/kanali/traffic"
 	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
 )
@@ -128,7 +128,12 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec
 		time.Sleep(2 * time.Second)
 	}
 
-	go server.Emit(binding, key.ObjectMeta.Name, time.Now())
+  go traffic.ReportTraffic(ctx, &spec.TrafficPoint{
+    Time: time.Now().UnixNano(),
+    Namespace: binding.ObjectMeta.Namespace,
+    ProxyName: binding.Spec.ProxyName,
+    KeyName: key.ObjectMeta.Name,
+  })
 	return nil
 
 }
