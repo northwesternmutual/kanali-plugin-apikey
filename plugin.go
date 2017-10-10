@@ -42,6 +42,8 @@ func init() {
 	config.Flags.Add(
 		flagPluginsAPIKeyHeaderKey,
 	)
+
+  etcdCtlr, _ = traffic.NewController()
 }
 
 var (
@@ -52,6 +54,8 @@ var (
 		Usage: "Name of the HTTP header holding the apikey.",
 	}
 )
+
+var etcdCtlr *traffic.EtcdController
 
 // APIKeyFactory is factory that implements the Plugin interface
 type APIKeyFactory struct{}
@@ -130,10 +134,10 @@ func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec
 		time.Sleep(2 * time.Second)
 	}
 
-  go traffic.ReportTraffic(ctx, &spec.TrafficPoint{
+  go etcdCtlr.ReportTraffic(ctx, &spec.TrafficPoint{
     Time: time.Now().UnixNano(),
     Namespace: binding.ObjectMeta.Namespace,
-    ProxyName: binding.Spec.ProxyName,
+    ProxyName: binding.Spec.APIProxyName,
     KeyName: key.ObjectMeta.Name,
   })
 	return nil
