@@ -28,12 +28,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/northwesternmutual/kanali/config"
 	"github.com/northwesternmutual/kanali/metrics"
 	"github.com/northwesternmutual/kanali/spec"
 	"github.com/northwesternmutual/kanali/utils"
   "github.com/northwesternmutual/kanali/traffic"
+  "github.com/northwesternmutual/kanali/logging"
 	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
 )
@@ -59,9 +59,11 @@ type APIKeyFactory struct{}
 // OnRequest intercepts a request before it get proxied to an upstream service
 func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, r *http.Request, span opentracing.Span) error {
 
+  logger := logging.WithContext(ctx)
+
 	// do not preform API key validation if a request is made using the OPTIONS http method
 	if strings.ToUpper(r.Method) == "OPTIONS" {
-		logrus.Debug("API key validation will not be preformed on HTTP OPTIONS requests")
+		logger.Debug("API key validation will not be preformed on HTTP OPTIONS requests")
 		return nil
 	}
 
