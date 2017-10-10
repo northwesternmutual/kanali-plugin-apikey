@@ -36,6 +36,7 @@ import (
   "github.com/northwesternmutual/kanali/logging"
 	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
+  "go.uber.org/zap/zapgrpc"
 )
 
 func init() {
@@ -64,6 +65,7 @@ type APIKeyFactory struct{}
 func (k APIKeyFactory) OnRequest(ctx context.Context, m *metrics.Metrics, p spec.APIProxy, r *http.Request, span opentracing.Span) error {
 
   logger := logging.WithContext(ctx)
+  clientv3.SetLogger(zapgrpc.NewLogger(logger))
 
 	// do not preform API key validation if a request is made using the OPTIONS http method
 	if strings.ToUpper(r.Method) == "OPTIONS" {
