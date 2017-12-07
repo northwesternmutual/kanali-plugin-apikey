@@ -1,16 +1,13 @@
 package: github.com/northwesternmutual/kanali-plugin-apikey
 import:
-- package: github.com/stretchr/testify
-  version: v1.1.4
-  subpackages:
-  - assert
 - package: github.com/northwesternmutual/kanali
-  version: v1.2.0
+  version: 00d2c68030b9ba9a7dc50429645d014ee30b6f58 #release-2.0
 - package: github.com/spf13/viper
   version: v1.0.0
 - package: github.com/opentracing/opentracing-go
   version: 1.0.2
-- package: k8s.io/kubernetes
-  version: v1.5.7
+testImport:
+- package: github.com/stretchr/testify
+  version: v1.1.4
   subpackages:
-  - pkg/api
+  - assert
