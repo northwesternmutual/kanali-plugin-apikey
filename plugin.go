@@ -18,118 +18,152 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package
 package main
 
 import (
+  "fmt"
 	"context"
 	"errors"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
-  "github.com/opentracing/opentracing-go"
-  flags "github.com/northwesternmutual/kanali/pkg/flags"
-  tags "github.com/northwesternmutual/kanali/pkg/tags"
-  kanaliError "github.com/northwesternmutual/kanali/pkg/errors"
-  utils "github.com/northwesternmutual/kanali/pkg/utils"
-  metrics "github.com/northwesternmutual/kanali/pkg/metrics"
-  traffic "github.com/northwesternmutual/kanali/pkg/traffic"
+  "go.uber.org/zap"
+  "github.com/northwesternmutual/kanali/pkg/tags"
+  "github.com/northwesternmutual/kanali/pkg/utils"
+  "github.com/northwesternmutual/kanali/pkg/metrics"
+  "github.com/northwesternmutual/kanali/pkg/traffic"
   "github.com/northwesternmutual/kanali/pkg/logging"
+  opentracing "github.com/opentracing/opentracing-go"
   "github.com/northwesternmutual/kanali/pkg/apis/kanali.io/v2"
-  options "github.com/northwesternmutual/kanali/cmd/kanali/app/options"
+  kanaliError "github.com/northwesternmutual/kanali/pkg/errors"
   store "github.com/northwesternmutual/kanali/pkg/store/kanali/v2"
+  pluginConfig "github.com/northwesternmutual/kanali-plugin-apikey/config"
 )
 
+// NOTE: This init function will be envoked upon plugin open. There is noguarenteed
+// that this function will be envoked upon the parent program's initial bootstrap
 func init() {
-	options.KanaliOptions.Add(
-		flagPluginsAPIKeyHeaderKey,
-	)
-  logging.Init(nil) // change me
-  etcdCtlr, _ = traffic.NewTrafficController()
+  // TODO: remove the following line
+  fmt.Println("api key plugin init function has been envoked")
+
+  ctlr, err := traffic.NewController()
+  if err != nil {
+    panic(err)
+  }
+  trafficCtlr = ctlr
 }
 
-var (
-	flagPluginsAPIKeyHeaderKey = flags.Flag{
-		Long:  "plugins.apiKey.header_key",
-		Short: "",
-		Value: "apikey",
-		Usage: "Name of the HTTP header holding the apikey.",
-	}
-)
+var trafficCtlr *traffic.Controller
 
-var etcdCtlr *traffic.TrafficController
-
-// APIKeyFactory is factory that implements the Plugin interface
+// ApiKeyFactory is factory that implements the github.com/northwesternmutual/kanali/pkg/plugin.Plugin interface
 type ApiKeyFactory struct{}
 
 // OnRequest intercepts a request before it get proxied to an upstream service
 func (k ApiKeyFactory) OnRequest(ctx context.Context, config map[string]string, m *metrics.Metrics, p v2.ApiProxy, r *http.Request, span opentracing.Span) error {
 
-  // create a contextual logger for this method
   logger := logging.WithContext(ctx)
-  currTime := time.Now()
+  timestamp := time.Now()
 
-	// do not preform API key validation if a request is made using the OPTIONS http method
+  cfg, err := pluginConfig.New(config)
+  if err != nil {
+    logger.Error(err.Error())
+    return failure(http.StatusUnauthorized, errors.New("api key not authorized"))
+  }
+
+	// do not continue if an OPTION request
 	if strings.ToUpper(r.Method) == "OPTIONS" {
-		logger.Debug("api key validation will not be preformed on http OPTIONS requests")
-		return nil
+		logger.Debug("api key validation is no preformed for OPTIONS requests")
+		return next()
 	}
 
-	// extract the api key header
-	apiKey := r.Header.Get(viper.GetString(flagPluginsAPIKeyHeaderKey.GetLong()))
-	if len(apiKey) < 1 {
-		m.Add(metrics.Metric{tags.KanaliApiKeyName, "unknown", true})
-		return &kanaliError.StatusError{http.StatusUnauthorized, errors.New("apikey not found in request")}
-	}
+	// extract the api key
+  apiKeyText, err := extractApiKey(r.Header)
+  if err != nil {
+    logger.Error("api key not found in request")
+    return failure(http.StatusUnauthorized, err)
+  }
 
 	// attempt to find a matching api key
-	key := store.ApiKeyStore().Get(apiKey)
-	if key == nil {
-		m.Add(metrics.Metric{tags.KanaliApiKeyName, "unknown", true})
-		return &kanaliError.StatusError{http.StatusUnauthorized, errors.New("apikey not found in k8s cluster")}
+	apiKeyObj := store.ApiKeyStore().Get(apiKeyText)
+	if apiKeyObj == nil {
+    logger.Error("api key was not found in store")
+		return failure(http.StatusUnauthorized, errors.New("api key not authorized"))
 	}
-	span.SetTag(tags.KanaliApiKeyName, key.ObjectMeta.Name)
-	m.Add(metrics.Metric{tags.KanaliApiKeyName, key.ObjectMeta.Name, true})
 
-	rule, rate := store.ApiKeyBindingStore().Get(p.ObjectMeta.Namespace, config["apiKeyBindingName"], key.ObjectMeta.Name, utils.ComputeTargetPath(p.Spec.Source.Path, p.Spec.Target.Path, r.URL.Path))
-	if rule == nil {
-		return &kanaliError.StatusError{http.StatusUnauthorized, errors.New("no binding found for associated ApiProxy")}
-	}
-	span.SetTag(tags.KanaliApiKeyBindingName, config["apiKeyBindingName"])
+  // BEGIN logging, metrics, and tracing overhead
+  logger.Debug("ApiKey resource details",
+    zap.String(tags.KanaliApiKeyName, apiKeyObj.ObjectMeta.Name),
+  )
+	span.SetTag(tags.KanaliApiKeyName, apiKeyObj.ObjectMeta.Name)
+	m.Add(metrics.Metric{
+    Name: tags.KanaliApiKeyName,
+    Value: apiKeyObj.ObjectMeta.Name,
+    Index: true,
+  })
+  // END logging, metrics, and tracing overhead
+
+	if !store.ApiKeyBindingStore().Contains(p.ObjectMeta.Namespace, cfg.ApiKeyBindingName) {
+    logger.Error("ApiKeyBinding resource was not found in store",
+      zap.String(tags.KanaliApiKeyBindingName, cfg.ApiKeyBindingName),
+      zap.String(tags.KanaliApiKeyBindingNamespace, p.ObjectMeta.Namespace),
+    )
+		return failure(http.StatusUnauthorized, errors.New("api key not authorized"))
+  }
+
+	span.SetTag(tags.KanaliApiKeyBindingName, cfg.ApiKeyBindingName)
 	span.SetTag(tags.KanaliApiKeyBindingNamespace, p.ObjectMeta.Namespace)
+  logger.Error("ApiKey resource details",
+     zap.String(tags.KanaliApiKeyBindingName, cfg.ApiKeyBindingName),
+     zap.String(tags.KanaliApiKeyBindingNamespace, p.ObjectMeta.Namespace),
+  )
 
-	// validate api key
-	if !validateAPIKey(*rule, r.Method) {
-		return &kanaliError.StatusError{http.StatusUnauthorized, errors.New("api key unauthorized")}
+  if !store.ApiKeyBindingStore().ContainsApiKey(p.ObjectMeta.Namespace, cfg.ApiKeyBindingName, apiKeyObj.ObjectMeta.Name) {
+    logger.Error("ApiKeyBinding resource does not any permissions for given ApiKey resource",
+      zap.String(tags.KanaliApiKeyBindingName, cfg.ApiKeyBindingName),
+      zap.String(tags.KanaliApiKeyBindingNamespace, p.ObjectMeta.Namespace),
+      zap.String(tags.KanaliApiKeyName, apiKeyObj.ObjectMeta.Name),
+    )
+		return failure(http.StatusUnauthorized, errors.New("api key not authorized"))
+  }
+
+  rule, rate := store.ApiKeyBindingStore().GetRuleAndRate(p.ObjectMeta.Namespace, cfg.ApiKeyBindingName, apiKeyObj.ObjectMeta.Name, utils.ComputeTargetPath(p.Spec.Source.Path, p.Spec.Target.Path, r.URL.Path))
+
+	if !validateApiKey(rule, r.Method) {
+    return failure(http.StatusUnauthorized, errors.New("api key unauthorized"))
 	}
 
-	if store.TrafficStore().IsRateLimitViolated(&p, rate, key.ObjectMeta.Name, currTime) {
-		return &kanaliError.StatusError{http.StatusTooManyRequests, errors.New("rate limit exceeded")}
+	if store.TrafficStore().IsRateLimitViolated(p, rate, apiKeyObj.ObjectMeta.Name, timestamp) {
+    logger.Info("rate limit exceeded")
+    return failure(http.StatusTooManyRequests, errors.New("api key unauthorized"))
 	}
 
-  go etcdCtlr.ReportTraffic(ctx, &store.TrafficPoint{
-    Time: currTime.UnixNano(),
+  go trafficCtlr.Report(ctx, &store.TrafficPoint{
+    Time: timestamp.UnixNano(),
     Namespace: p.ObjectMeta.Namespace,
     ProxyName: config["apiKeyBindingName"],
-    KeyName: key.ObjectMeta.Name,
+    KeyName: apiKeyObj.ObjectMeta.Name,
   })
-	return nil
+
+	return next()
 
 }
 
 // OnResponse intercepts a request after it has been proxied to an upstream service
 // but before the response gets returned to the client
 func (k ApiKeyFactory) OnResponse(ctx context.Context, m *metrics.Metrics, p v2.ApiProxy, r *http.Request, resp *http.Response, span opentracing.Span) error {
-	return nil
+  logging.WithContext(ctx).Info("api key plugin OnRequest method not implemented")
+  return next()
 }
 
-// validateAPIKey will return true if the given api key
+// validateApiKey will return true if the given api key
 // is authorized to make the given request.
 // Global rule valudation will be given priority over
 // granular rule validation
-func validateAPIKey(rule v2.Rule, method string) bool {
+func validateApiKey(rule *v2.Rule, method string) bool {
+  if rule == nil {
+    return false
+  }
 	return rule.Global || validateGranularRules(method, rule.Granular)
 }
 
@@ -145,6 +179,25 @@ func validateGranularRules(method string, rule v2.GranularProxy) bool {
 		}
 	}
 	return false
+}
+
+func next() error {
+  return nil
+}
+
+func failure(code int, err error) error {
+  return &kanaliError.StatusError{
+    Code: code,
+    Err: err,
+  }
+}
+
+func extractApiKey(reqHeaders http.Header) (string, error) {
+  apiKeyText := reqHeaders.Get("apikey")
+	if len(apiKeyText) < 1 {
+		return "", errors.New("expected the apikey header to contain an api key value")
+	}
+  return apiKeyText, nil
 }
 
 // Plugin can be discovered by golang plugin package

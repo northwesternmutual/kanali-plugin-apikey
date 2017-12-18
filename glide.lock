@@ -1,5 +1,5 @@
-hash: 05275c317294672527a37c0744c5929942b3ac1939dca1e0117f09528f2be188
-updated: 2017-12-07T11:02:37.743972-06:00
+hash: eae90a88ecb7a5959ef0c42ef19527e9c4368fad985396758177c6df7ccd1221
+updated: 2017-12-18T10:29:02.868223-05:00
 imports:
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
@@ -27,7 +27,7 @@ imports:
   subpackages:
   - capnslog
 - name: github.com/cpuguy83/go-md2man
-  version: 1d903dcb749992f3741d744c0f8376b4bd7eb3e1
+  version: 23709d0847197db6021a51fdb193e66e9222d4e7
   subpackages:
   - md2man
 - name: github.com/emicklei/go-restful
@@ -47,7 +47,7 @@ imports:
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
 - name: github.com/gogo/protobuf
-  version: 909568be09de550ed094403c2bf8a261b5bb730a
+  version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:
   - proto
   - sortkeys
@@ -96,15 +96,15 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/northwesternmutual/kanali
-  version: 00d2c68030b9ba9a7dc50429645d014ee30b6f58
+  version: e8632e0697f7a5ae60406240a89fc958225ecb5a
   subpackages:
   - cmd/kanali/app/options
   - pkg/apis/kanali.io
   - pkg/apis/kanali.io/v2
+  - pkg/errors
   - pkg/flags
   - pkg/logging
   - pkg/metrics
-  - pkg/store
   - pkg/store/kanali/v2
   - pkg/tags
   - pkg/traffic
@@ -138,7 +138,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/russross/blackfriday
-  version: 6d1ef893fcb01b4f50cb6e57ed7df3e2e627b6b2
+  version: 4048872b16cc0fc2c5fd9eacf0ed2c2fedaa0c8c
 - name: github.com/spf13/afero
   version: e67d870304c4bca21331b02f414f970df13aa694
   subpackages:
@@ -150,7 +150,7 @@ imports:
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: go.uber.org/atomic
@@ -167,7 +167,7 @@ imports:
   - zapcore
   - zapgrpc
 - name: golang.org/x/net
-  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
   - http2
@@ -177,7 +177,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 7ddbeae9ae08c6a06a59597f0c9edbc5ff2444ce
+  version: e48874b42435b4347fc52bdee0424a52abc974d7
   subpackages:
   - unix
 - name: golang.org/x/text

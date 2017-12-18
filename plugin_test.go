@@ -21,18 +21,11 @@
 package main
 
 // import (
-// 	"context"
-// 	"net/http"
-// 	"net/url"
-// 	"testing"
-//
-// 	"github.com/northwesternmutual/kanali/pkg/metrics"
-// 	"github.com/northwesternmutual/kanali/pkg/store"
-// 	"github.com/opentracing/opentracing-go"
-// 	"github.com/spf13/viper"
-// 	"github.com/stretchr/testify/assert"
+//   "os"
+//   "fmt"
+//   "testing"
 // )
-//
+
 // func TestOnRequest(t *testing.T) {
 // 	assert := assert.New(t)
 //
