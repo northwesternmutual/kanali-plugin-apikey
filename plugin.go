@@ -151,7 +151,7 @@ func (k ApiKeyFactory) OnRequest(ctx context.Context, config map[string]string, 
 
 // OnResponse intercepts a request after it has been proxied to an upstream service
 // but before the response gets returned to the client
-func (k ApiKeyFactory) OnResponse(ctx context.Context, m *metrics.Metrics, p v2.ApiProxy, r *http.Request, resp *http.Response, span opentracing.Span) error {
+func (k ApiKeyFactory) OnResponse(ctx context.Context, config map[string]string, m *metrics.Metrics, p v2.ApiProxy, r *http.Request, resp *http.Response, span opentracing.Span) error {
   logging.WithContext(ctx).Info("api key plugin OnRequest method not implemented")
   return next()
 }
