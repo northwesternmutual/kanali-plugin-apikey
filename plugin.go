@@ -21,18 +21,18 @@
 package main
 
 import (
-  "fmt"
+  //"fmt"
 	"context"
 	"errors"
 	"net/http"
 	"strings"
-	"time"
+	//"time"
 
   "go.uber.org/zap"
   "github.com/northwesternmutual/kanali/pkg/tags"
   "github.com/northwesternmutual/kanali/pkg/utils"
   "github.com/northwesternmutual/kanali/pkg/metrics"
-  "github.com/northwesternmutual/kanali/pkg/traffic"
+  // "github.com/northwesternmutual/kanali/pkg/traffic"
   "github.com/northwesternmutual/kanali/pkg/logging"
   opentracing "github.com/opentracing/opentracing-go"
   "github.com/northwesternmutual/kanali/pkg/apis/kanali.io/v2"
@@ -43,18 +43,18 @@ import (
 
 // NOTE: This init function will be envoked upon plugin open. There is noguarenteed
 // that this function will be envoked upon the parent program's initial bootstrap
-func init() {
-  // TODO: remove the following line
-  fmt.Println("api key plugin init function has been envoked")
+// func init() {
+//   // TODO: remove the following line
+//   fmt.Println("api key plugin init function has been envoked")
+//
+//   ctlr, err := traffic.NewController()
+//   if err != nil {
+//     panic(err)
+//   }
+//   trafficCtlr = ctlr
+// }
 
-  ctlr, err := traffic.NewController()
-  if err != nil {
-    panic(err)
-  }
-  trafficCtlr = ctlr
-}
-
-var trafficCtlr *traffic.Controller
+// var trafficCtlr *traffic.Controller
 
 // ApiKeyFactory is factory that implements the github.com/northwesternmutual/kanali/pkg/plugin.Plugin interface
 type ApiKeyFactory struct{}
@@ -63,7 +63,7 @@ type ApiKeyFactory struct{}
 func (k ApiKeyFactory) OnRequest(ctx context.Context, config map[string]string, m *metrics.Metrics, p v2.ApiProxy, r *http.Request, span opentracing.Span) error {
 
   logger := logging.WithContext(ctx)
-  timestamp := time.Now()
+  // timestamp := time.Now()
 
   cfg, err := pluginConfig.New(config)
   if err != nil {
@@ -127,23 +127,23 @@ func (k ApiKeyFactory) OnRequest(ctx context.Context, config map[string]string, 
 		return failure(http.StatusUnauthorized, errors.New("api key not authorized"))
   }
 
-  rule, rate := store.ApiKeyBindingStore().GetRuleAndRate(p.ObjectMeta.Namespace, cfg.ApiKeyBindingName, apiKeyObj.ObjectMeta.Name, utils.ComputeTargetPath(p.Spec.Source.Path, p.Spec.Target.Path, r.URL.Path))
+  rule, _ := store.ApiKeyBindingStore().GetRuleAndRate(p.ObjectMeta.Namespace, cfg.ApiKeyBindingName, apiKeyObj.ObjectMeta.Name, utils.ComputeTargetPath(p.Spec.Source.Path, p.Spec.Target.Path, r.URL.Path))
 
 	if !validateApiKey(rule, r.Method) {
     return failure(http.StatusUnauthorized, errors.New("api key unauthorized"))
 	}
 
-	if store.TrafficStore().IsRateLimitViolated(p, rate, apiKeyObj.ObjectMeta.Name, timestamp) {
-    logger.Info("rate limit exceeded")
-    return failure(http.StatusTooManyRequests, errors.New("api key unauthorized"))
-	}
-
-  go trafficCtlr.Report(ctx, &store.TrafficPoint{
-    Time: timestamp.UnixNano(),
-    Namespace: p.ObjectMeta.Namespace,
-    ProxyName: config["apiKeyBindingName"],
-    KeyName: apiKeyObj.ObjectMeta.Name,
-  })
+	// if store.TrafficStore().IsRateLimitViolated(p, rate, apiKeyObj.ObjectMeta.Name, timestamp) {
+  //   logger.Info("rate limit exceeded")
+  //   return failure(http.StatusTooManyRequests, errors.New("api key unauthorized"))
+	// }
+  //
+  // go trafficCtlr.Report(ctx, &store.TrafficPoint{
+  //   Time: timestamp.UnixNano(),
+  //   Namespace: p.ObjectMeta.Namespace,
+  //   ProxyName: config["apiKeyBindingName"],
+  //   KeyName: apiKeyObj.ObjectMeta.Name,
+  // })
 
 	return next()
 
