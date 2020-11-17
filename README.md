@@ -1,3 +1,4 @@
+# DEPRECATED - no longer being maintained
 # kanali-plugin-apikey
 
 [![Travis branch](https://img.shields.io/travis/northwesternmutual/kanali-plugin-apikey/master.svg?style=flat-square)](https://travis-ci.org/northwesternmutual/kanali-plugin-apikey) [![Coveralls branch](https://img.shields.io/coveralls/northwesternmutual/kanali-plugin-apikey/master.svg?style=flat-square)](https://coveralls.io/github/northwesternmutual/kanali-plugin-apikey) [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/northwesternmutual/kanali-plugin-apikey)
